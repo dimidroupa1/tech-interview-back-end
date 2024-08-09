@@ -17,7 +17,7 @@ articleRouter.post(
   uploadArticle
 );
 articleRouter.put(
-  "/edit-article",
+  "/edit-article/:id",
   isAutheticated,
   authorizeRoles("admin"),
   editArticle

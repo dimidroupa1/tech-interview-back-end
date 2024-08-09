@@ -15,11 +15,27 @@ export const createArticle = CatchAsyncError(
 );
 
 // get all articles
-export const getAllArticlesService = async (res: Response) => {
-  const articles = await ArticleModel.find().sort({ createdAt: -1 });
+export const getAllArticlesService = async (
+  res: Response,
+  skip: number,
+  limit: number,
+  totalPages: number,
+  search: string
+) => {
+  const articles = await ArticleModel.find({
+    keywords: { $elemMatch: { $regex: new RegExp(search.toLowerCase(), "i") } },
+  })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
   res.status(201).json({
     success: true,
     articles,
+    totalPages,
   });
+};
+
+export const countAllArticlesService = async () => {
+  return await ArticleModel.countDocuments();
 };

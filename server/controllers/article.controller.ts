@@ -8,6 +8,7 @@ import ArticleModel, { IArticle } from "../models/article.model";
 import { redis } from "../utils/redis";
 import { IUser } from "../models/user.model";
 import {
+    countAllArticlesService,
   createArticle,
   getAllArticlesService,
 } from "../services/article.service";
@@ -40,11 +41,14 @@ export const uploadArticle = CatchAsyncError(
       await dropDuplicateIndex();
 
       const data = req.body;
+      console.log(data);
       const image = data.image;
 
       const myCloud = await cloudinary.v2.uploader.upload(image, {
         folder: "articles",
       });
+
+      console.log(1);
 
       data.image = {
         public_id: myCloud.public_id,
@@ -52,6 +56,7 @@ export const uploadArticle = CatchAsyncError(
       };
 
       createArticle(data, res, next);
+      console.log(2);
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 500));
     }
@@ -65,10 +70,10 @@ export const editArticle = CatchAsyncError(
       const data = req.body;
       const image = data.image;
 
-      if (image) {
+      if (!image.url.includes("res.cloudinary.com")) {
         await cloudinary.v2.uploader.destroy(image.public_id);
 
-        const myCloud = await cloudinary.v2.uploader.upload(image, {
+        const myCloud = await cloudinary.v2.uploader.upload(image.url, {
           folder: "articles",
         });
 
@@ -104,7 +109,17 @@ export const editArticle = CatchAsyncError(
 export const getAllArticles = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      getAllArticlesService(res);
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const search = (req.query.search as string) || "";
+      const limit = 5;
+      const skip = (page - 1) * limit;
+      console.log("SEARCH ==>", search)
+
+      
+      const totalArticles = await countAllArticlesService();
+      const totalPages = Math.ceil(totalArticles / limit);
+      
+      await getAllArticlesService(res, skip, limit, totalPages, search);
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
@@ -117,7 +132,7 @@ export const getArticleById = CatchAsyncError(
     try {
       const articleId = req.params.id;
 
-      const article = await ArticleModel.findById(articleId)
+      const article = await ArticleModel.findById(articleId);
 
       if (!article) return next(new ErrorHandler("Article not found", 400));
 
@@ -136,6 +151,7 @@ export const deleteArticle = CatchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      console.log("ID ==>", id);
 
       const article = await ArticleModel.findById(id);
 

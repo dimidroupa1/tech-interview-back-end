@@ -113,7 +113,6 @@ export const getAllArticles = CatchAsyncError(
       const search = (req.query.search as string) || "";
       const limit = 5;
       const skip = (page - 1) * limit;
-      console.log("SEARCH ==>", search)
 
       
       const totalArticles = await countAllArticlesService();

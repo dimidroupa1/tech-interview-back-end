@@ -10,7 +10,6 @@ This is a backend server built with Node.js and TypeScript.
 - **Mongoose**: ODM (Object Data Modeling) library for MongoDB, used for database operations.
 - **bcryptjs**: Library for hashing passwords securely.
 - **cloudinary**: Manages and stores images and other media files in the cloud.
-- **cookie-parser**: Middleware to parse cookies from incoming requests.
 - **cors**: Middleware to enable Cross-Origin Resource Sharing, allowing the server to handle requests from different origins.
 - **dotenv**: Loads environment variables from a `.env` file into `process.env`.
 - **ejs**: Templating engine for rendering dynamic HTML on the server side.
